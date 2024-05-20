@@ -127,7 +127,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BookingScheduler.cpp" />
+    <ClCompile Include="Customer.cpp" />
+    <ClCompile Include="MailSender.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Schedule.cpp" />
+    <ClCompile Include="SmsSender.cpp" />
+    <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
