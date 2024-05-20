@@ -1,6 +1,8 @@
 ﻿#include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "../Project9-5/BookingScheduler.cpp"
+#include "BookingScheduler.cpp"
+#include "TestableSmsSender.cpp"
+#include "TestableMailSender.cpp"
 #include <iostream>
 #include <ctime>
 
@@ -14,21 +16,6 @@ time_t getTime(int year, int mon, int day, int hour, int min, int sec) {
     //mktime = tm_wday, tm_yday를 자동으로 계산 후 time_t 리턴
     return mktime(&result);
 }
-
-class TestableSmsSender : public SmsSender {
-public:
-    void send(Schedule* schedule) override {
-        cout << "테스트용 SmsSender class의 send 메서드 실행됨" << endl;
-        sendMethodIsCalled = true;
-    }
-
-    bool isSendMethodIsCalled() {
-        return sendMethodIsCalled;
-    }
-
-private:
-    bool sendMethodIsCalled;
-};
 
 class BookingItem : public testing::Test {
 protected:
@@ -129,7 +116,16 @@ TEST_F(BookingItem, 예약완료시_SMS는_무조건_발송) {
 }
 
 TEST_F(BookingItem, 이메일이_없는_경우에는_이메일_미발송) {
+    // arrange
+    TestableMailSender testableMailSender;
+    Schedule* schedule = new Schedule{ ON_THE_HOUR, UNDER_CAPACITY, CUSTOMER };
+    bookingScheduler.setMailSender(&testableMailSender);
 
+    // act
+    bookingScheduler.addSchedule(schedule);
+
+    // assert
+    EXPECT_EQ(0, testableMailSender.getCountSendMailMethodIsCalled());
 }
 
 TEST_F(BookingItem, 이메일이_있는_경우에는_이메일_발송) {
