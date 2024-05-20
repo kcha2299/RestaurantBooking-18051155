@@ -39,7 +39,25 @@ TEST(BookingSchedulerTest, 예약은_정시에만_가능하다_정시가_아닌�
 
 
 TEST(BookingSchedulerTest, 예약은_정시에만_가능하다_정시인_경우_예약가능) {
+    // arrange
+    tm OnTheHour = { 0 };
+    OnTheHour.tm_year = 2021 - 1900;
+    OnTheHour.tm_mon = 03 - 1;
+    OnTheHour.tm_mday = 26;
+    OnTheHour.tm_hour = 9;
+    OnTheHour.tm_min = 0;
+    OnTheHour.tm_isdst = -1;
+    mktime(&OnTheHour);
 
+    Customer customer{ "Fake name", "010-1234-5678" };
+    Schedule* schedule = new Schedule{ OnTheHour, 1, customer };
+    BookingScheduler bookingScheduler{ 3 };
+
+    // act
+    bookingScheduler.addSchedule(schedule);
+
+    // assert
+    EXPECT_EQ(true, bookingScheduler.hasSchedule(schedule));
 }
 
 TEST(BookingSchedulerTest, 시간대별_인원제한이_있다_같은_시간대에_Capacity_초과할_경우_예외발생) {
