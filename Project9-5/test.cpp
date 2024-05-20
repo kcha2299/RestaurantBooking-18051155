@@ -15,11 +15,28 @@ time_t getTime(int year, int mon, int day, int hour, int min, int sec) {
     return mktime(&result);
 }
 
+class TestableSmsSender : public SmsSender {
+public:
+    void send(Schedule* schedule) override {
+        cout << "테스트용 SmsSender class의 send 메서드 실행됨" << endl;
+        sendMethodIsCalled = true;
+    }
+
+    bool isSendMethodIsCalled() {
+        return sendMethodIsCalled;
+    }
+
+private:
+    bool sendMethodIsCalled;
+};
+
 class BookingItem : public testing::Test {
 protected:
     void SetUp() override {
         NOT_ON_THE_HOUR = getTime(2021, 3, 26, 9, 5);
         ON_THE_HOUR = getTime(2021, 3, 26, 9, 0);
+
+        bookingScheduler.setSmsSender(&testableSmsSender);
     }
 public:
     tm getTime(int year, int mon, int day, int hour, int min) {
@@ -41,21 +58,7 @@ public:
     const int CAPACITY_PER_HOUR = 3;
 
     BookingScheduler bookingScheduler{ CAPACITY_PER_HOUR };
-};
-
-class TestableSmsSender : public SmsSender {
-public:
-    void send(Schedule* schedule) override {
-        cout << "테스트용 SmsSender class의 send 메서드 실행됨" << endl;
-        sendMethodIsCalled = true;
-    }
-
-    bool isSendMethodIsCalled() {
-        return sendMethodIsCalled;
-    }
-
-private:
-    bool sendMethodIsCalled;
+    TestableSmsSender testableSmsSender;
 };
 
 TEST_F(BookingItem, 예약은_정시에만_가능하다_정시가_아닌경우_예약불가) {
@@ -116,9 +119,7 @@ TEST_F(BookingItem, 시간대별_인원제한이_있다_같은_시간대가_다�
 
 TEST_F(BookingItem, 예약완료시_SMS는_무조건_발송) {
     // arrange
-    TestableSmsSender testableSmsSender;
     Schedule* schedule = new Schedule(ON_THE_HOUR, CAPACITY_PER_HOUR, CUSTOMER);
-    bookingScheduler.setSmsSender(&testableSmsSender);
 
     // act
     bookingScheduler.addSchedule(schedule);
