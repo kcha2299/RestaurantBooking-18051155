@@ -43,6 +43,21 @@ public:
     BookingScheduler bookingScheduler{ CAPACITY_PER_HOUR };
 };
 
+class TestableSmsSender : public SmsSender {
+public:
+    void send(Schedule* schedule) override {
+        cout << "테스트용 SmsSender class의 send 메서드 실행됨" << endl;
+        sendMethodIsCalled = true;
+    }
+
+    bool isSendMethodIsCalled() {
+        return sendMethodIsCalled;
+    }
+
+private:
+    bool sendMethodIsCalled;
+};
+
 TEST_F(BookingItem, 예약은_정시에만_가능하다_정시가_아닌경우_예약불가) {
     // arrange
     Schedule* schedule = new Schedule{ NOT_ON_THE_HOUR, UNDER_CAPACITY, CUSTOMER };
@@ -100,7 +115,16 @@ TEST_F(BookingItem, 시간대별_인원제한이_있다_같은_시간대가_다�
 }
 
 TEST_F(BookingItem, 예약완료시_SMS는_무조건_발송) {
+    // arrange
+    TestableSmsSender testableSmsSender;
+    Schedule* schedule = new Schedule(ON_THE_HOUR, CAPACITY_PER_HOUR, CUSTOMER);
+    bookingScheduler.setSmsSender(&testableSmsSender);
 
+    // act
+    bookingScheduler.addSchedule(schedule);
+
+    // assert
+    EXPECT_EQ(true, testableSmsSender.isSendMethodIsCalled());
 }
 
 TEST_F(BookingItem, 이메일이_없는_경우에는_이메일_미발송) {
