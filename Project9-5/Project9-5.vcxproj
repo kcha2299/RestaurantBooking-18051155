@@ -131,8 +131,10 @@
     <ClCompile Include="Customer.cpp" />
     <ClCompile Include="MailSender.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MondayBookingScheduler.cpp" />
     <ClCompile Include="Schedule.cpp" />
     <ClCompile Include="SmsSender.cpp" />
+    <ClCompile Include="SundayBookingScheduler.cpp" />
     <ClCompile Include="test.cpp" />
     <ClCompile Include="TestableSmsSender.cpp" />
     <ClCompile Include="TestableMailSender.cpp" />

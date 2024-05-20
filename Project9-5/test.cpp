@@ -3,6 +3,8 @@
 #include "BookingScheduler.cpp"
 #include "TestableSmsSender.cpp"
 #include "TestableMailSender.cpp"
+#include "SundayBookingScheduler.cpp"
+#include "MondayBookingScheduler.cpp"
 #include <iostream>
 #include <ctime>
 
@@ -141,9 +143,29 @@ TEST_F(BookingItem, 이메일이_있는_경우에는_이메일_발송) {
 }
 
 TEST_F(BookingItem, 현재날짜가_일요일인_경우_예약불가_예외처리) {
+    // arrange
+    BookingScheduler* bookingScheduler = new SundayBookingScheduler{ CAPACITY_PER_HOUR };
 
+    try {
+        // act
+        Schedule* schedule = new Schedule{ ON_THE_HOUR, UNDER_CAPACITY, CUSTOMER_WITH_MAIL };
+        bookingScheduler->addSchedule(schedule);
+        FAIL();
+    }
+    catch (runtime_error& e) {
+        // assert
+        EXPECT_EQ(string{ e.what() }, string{ "Booking system is not available on sunday" });
+    }
 }
 
 TEST_F(BookingItem, 현재날짜가_일요일이_아닌경우_예약가능) {
+    // arrange
+    BookingScheduler* bookingScheduler = new MondayBookingScheduler{ CAPACITY_PER_HOUR };
 
+    // act
+    Schedule* schedule = new Schedule{ ON_THE_HOUR, UNDER_CAPACITY, CUSTOMER_WITH_MAIL };
+    bookingScheduler->addSchedule(schedule);
+
+    // assert
+    EXPECT_EQ(true, bookingScheduler->hasSchedule(schedule));
 }
